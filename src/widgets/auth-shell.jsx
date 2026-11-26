@@ -1,4 +1,4 @@
-// WIDGET: Khung 2 cột (ảnh bên trái, form bên phải) dùng chung cho Đăng nhập / Đăng ký / OTP / Quên mật khẩu.
+// WIDGET: Khung 2 cột (ảnh bên trái, form bên phải) dùng chung cho Đăng nhập / Đăng ký / Quên mật khẩu.
 import { CheckCircleFilled } from '@ant-design/icons';
 import nen from '@shared/assets/nen.jpg';
 import './widgets.css';

@@ -11,7 +11,7 @@ import './features.css';
 export function AssignCard({ ticket: c, departments, onDone }) {
   const [form] = Form.useForm();
   const [submit, loading] = useAction(
-    (v) => api(`/api/complaints/${c.id}/assignments`, { method: 'POST', body: { department_id: v.department_id, due_at: v.due_at ? v.due_at.toISOString() : '' } }),
+    (v) => api(`/api/feedbacks/${c.id}/assignments`, { method: 'POST', body: { department_id: v.department_id, due_at: v.due_at ? v.due_at.toISOString() : '' } }),
     { form, success: 'Đã giao việc.', onDone: async () => { form.resetFields(); await onDone(); } });
 
   if (SIMPLE_TYPES.includes(c.type)) return null;          // góp ý / khen ngợi không cần phân công (BR-09)

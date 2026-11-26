@@ -8,7 +8,7 @@ import './features.css';
 export function ApproveCard({ ticket: c, user, onDone }) {
   const [form] = Form.useForm();
   const [decision, setDecision] = useState('approve');          // nút nào được bấm quyết định approve/reject
-  const [submit, loading] = useAction((v) => api(`/api/complaints/${c.id}/approval`, { method: 'POST', body: { decision, reason: (v.reason || '').trim() } }),
+  const [submit, loading] = useAction((v) => api(`/api/feedbacks/${c.id}/approval`, { method: 'POST', body: { decision, reason: (v.reason || '').trim() } }),
     { form, success: 'Đã ghi nhận quyết định.', onDone });
   if (user.role !== 'manager' || c.status !== 'PendingApproval') return null;
 

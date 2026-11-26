@@ -10,7 +10,7 @@ const toOptions = (obj) => Object.entries(obj).map(([value, label]) => ({ value,
 export function ClassifyCard({ ticket: c, onDone }) {
   const [form] = Form.useForm();
   const [submit, loading] = useAction(
-    (v) => api(`/api/complaints/${c.id}/classification`, { method: 'PATCH', body: { ...v, expected_updated_at: c.updated_at } }),
+    (v) => api(`/api/feedbacks/${c.id}/classification`, { method: 'PATCH', body: { ...v, expected_updated_at: c.updated_at } }),
     { form, success: 'Đã lưu phân loại.', onDone });
   if (c.status === 'Closed') return null;
   return (

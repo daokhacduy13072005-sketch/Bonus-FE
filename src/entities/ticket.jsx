@@ -54,6 +54,7 @@ export const MAX_REOPEN = 3;
 
 // "Tòa 1 · Tầng 3 · Phòng 302 (cạnh thang máy)". Phiếu cũ chưa có vị trí → "–"
 export function locationText(loc) {
+  if (typeof loc === 'string') return loc || '–';
   if (!loc || !loc.building) return '–';
   const parts = [loc.building];
   if (loc.floor) parts.push(/^B/i.test(loc.floor) ? `Hầm ${String(loc.floor).toUpperCase()}` : `Tầng ${loc.floor}`);
@@ -63,9 +64,42 @@ export function locationText(loc) {
 
 /* ===================== 2. GỌI API ===================== */
 
-export const listTickets = (params) => api('/api/complaints' + (params ? '?' + new URLSearchParams(params) : ''));
-export const listMyTickets = () => api('/api/complaints/mine');
-export const getTicket = (idOrCode) => api('/api/complaints/' + encodeURIComponent(idOrCode));
+export const listTickets = (params) => api('/api/feedbacks' + (params ? '?' + new URLSearchParams(params) : ''));
+export const listMyTickets = async () => {
+  const response = await api('/api/feedbacks/mine');
+  const tickets = Array.isArray(response) ? response : response?.content;
+  if (!Array.isArray(tickets)) {
+    throw new Error('API danh sách phiếu trả về dữ liệu không hợp lệ.');
+  }
+
+  const statuses = {
+    NEW: 'New',
+    ASSIGNED: 'Assigned',
+    IN_PROGRESS: 'InProgress',
+    PENDING_APPROVAL: 'PendingApproval',
+    RESOLVED: 'Resolved',
+    CLOSED: 'Closed',
+    REOPENED: 'Reopened',
+  };
+  const types = {
+    COMPLAINT: 'complaint',
+    SUGGESTION: 'suggestion',
+    PROPOSAL: 'suggestion',
+    PRAISE: 'praise',
+  };
+
+  return tickets.map((ticket) => ({
+    ...ticket,
+    tracking_code: ticket.tracking_code ?? ticket.code,
+    created_at: ticket.created_at ?? ticket.createdAt,
+    updated_at: ticket.updated_at ?? ticket.updatedAt,
+    type: types[ticket.type] || ticket.type,
+    status: statuses[ticket.status] || ticket.status,
+    priority: ticket.priority === 'NORMAL' ? 'Medium'
+      : ticket.priority ? ticket.priority[0] + ticket.priority.slice(1).toLowerCase() : ticket.priority,
+  }));
+};
+export const getTicket = (idOrCode) => api('/api/feedbacks/' + encodeURIComponent(idOrCode));
 export const getDashboard = () => api('/api/dashboard');
 
 /* ===================== 3. KHỐI HIỂN THỊ ===================== */

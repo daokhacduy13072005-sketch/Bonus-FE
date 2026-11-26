@@ -3,7 +3,7 @@ import { Button, Form, Input, Rate } from 'antd';
 import { api } from '@shared/api.js';
 import { useAction } from '@shared/ui.jsx';
 
-const rateTicket = (id, stars, comment) => api(`/api/complaints/${id}/rating`, { method: 'POST', body: { stars, comment } });
+const rateTicket = (id, stars, comment) => api(`/api/feedbacks/${id}/rating`, { method: 'POST', body: { stars, comment } });
 const LABELS = ['Rất tệ', 'Chưa tốt', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
 
 export function RateForm({ ticket, onDone }) {

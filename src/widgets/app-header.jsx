@@ -12,14 +12,13 @@ const NAV = {
   cs_staff: [['/staff/queue', 'Hàng đợi']],
   dept_staff: [['/dept/tasks', 'Việc được giao']],
   manager: [['/manager/dashboard', 'Dashboard'], ['/manager/escalated', 'Chuyển cấp / Chờ duyệt']],
-  admin: [['/admin', 'Quản trị']],
 };
 
 const GUIDE = (
   <div className="mega-panel wide">
     <Link to="/register" className="mega-feature"><strong>Cổng Cư Dân</strong><p>Gửi phản ánh, theo dõi tiến độ xử lý và đánh giá dịch vụ tòa nhà trực tuyến.</p></Link>
     <div className="mega-col">
-      <Link to="/register" className="mega-link"><strong>Đăng ký tài khoản</strong><span>Tạo tài khoản cư dân với xác thực OTP.</span></Link>
+      <Link to="/register" className="mega-link"><strong>Đăng ký tài khoản</strong><span>Tạo tài khoản cư dân để sử dụng hệ thống.</span></Link>
       <Link to="/forgot" className="mega-link"><strong>Khôi phục mật khẩu</strong><span>Hướng dẫn lấy lại quyền truy cập tài khoản.</span></Link>
       <Link to="/" className="mega-link"><strong>Quy trình xử lý</strong><span>Các bước tiếp nhận phản ánh &amp; khiếu nại.</span></Link>
     </div>
@@ -51,7 +50,8 @@ function UserNav({ user }) {
   const { logout } = useAuth();
   const items = NAV[user.role] || [];
   const active = items.filter(([p]) => pathname.startsWith(p)).sort((a, b) => b[0].length - a[0].length)[0]?.[0];
-  const initial = (user.name || '?').trim().split(/\s+/).pop().charAt(0).toUpperCase();
+  const displayName = user.name || user.fullName || user.full_name || user.username || user.email || 'Khách hàng';
+  const initial = displayName.trim().split(/\s+/).pop().charAt(0).toUpperCase();
   return (
     <>
       <Menu mode="horizontal" className="main-nav" selectedKeys={active ? [active] : []} disabledOverflow
@@ -60,7 +60,7 @@ function UserNav({ user }) {
         menu={{ items: [{ key: 'out', icon: <LogoutOutlined />, danger: true, label: 'Đăng xuất', onClick: () => { logout(); navigate('/'); } }] }}>
         <div className="user-chip" role="button" tabIndex={0}>
           <Avatar style={{ background: 'linear-gradient(135deg,#f36f21,#ff9a5a)' }}>{initial}</Avatar>
-          <span className="user-info"><b>{user.name}</b><small>{ROLES[user.role]}</small></span>
+          <span className="user-info"><b>{displayName}</b><small>{ROLES[user.role]}</small></span>
           <DownOutlined style={{ fontSize: 11, color: '#64748b' }} />
         </div>
       </Dropdown>

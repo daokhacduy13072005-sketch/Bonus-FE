@@ -77,7 +77,7 @@ export function LandingPage() {
       <section className="section" style={{ paddingTop: 0 }}><div className="container">
         <Reveal>
           <div className="cta-band">
-            <div><h2>Sẵn sàng gửi phản hồi đầu tiên?</h2><p>Đăng ký bằng email, xác thực OTP và bắt đầu trong chưa đầy một phút.</p></div>
+            <div><h2>Sẵn sàng gửi phản hồi đầu tiên?</h2><p>Đăng ký bằng email và bắt đầu trong chưa đầy một phút.</p></div>
             <Link to="/register"><Button size="large" type="primary" className="btn-accent">Bắt đầu ngay</Button></Link>
           </div>
         </Reveal>

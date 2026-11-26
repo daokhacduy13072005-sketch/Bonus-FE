@@ -14,6 +14,10 @@ import { locale, theme } from './theme.js';
 // Đặt ở cấp module để có hiệu lực TRƯỚC mọi lời gọi API đầu tiên.
 configureApi({
   getToken: () => getSession()?.token,
+  getCustomerId: () => {
+    const user = getSession()?.user;
+    return user?.customer_id || user?.customerId;
+  },
   onUnauthorized: () => {
     clearSession();
     window.dispatchEvent(new Event('ccms:session-expired'));      // AuthProvider lắng nghe và xoá người dùng khỏi state

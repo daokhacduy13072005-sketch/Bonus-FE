@@ -6,7 +6,7 @@ import './features.css';
 
 export function EscalateCard({ ticket: c, user, onDone }) {
   const [form] = Form.useForm();
-  const [submit, loading] = useAction((v) => api(`/api/complaints/${c.id}/escalation`, { method: 'POST', body: { reason: v.reason } }),
+  const [submit, loading] = useAction((v) => api(`/api/feedbacks/${c.id}/escalation`, { method: 'POST', body: { reason: v.reason } }),
     { form, success: 'Đã chuyển cấp.', onDone });
   if (user.role !== 'cs_staff' || c.escalated || c.status === 'Closed') return null;
   return (

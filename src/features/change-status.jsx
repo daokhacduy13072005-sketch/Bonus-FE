@@ -11,7 +11,7 @@ const nextStatuses = (c) => (TRANSITIONS.staff_like[c.status] || []).filter((s) 
 export function ChangeStatusCard({ ticket: c, onDone }) {
   const [form] = Form.useForm();
   const [submit, loading] = useAction(
-    (v) => api(`/api/complaints/${c.id}/status`, { method: 'PATCH', body: { to_status: v.to_status, note: v.note || '', expected_updated_at: c.updated_at } }),
+    (v) => api(`/api/feedbacks/${c.id}/status`, { method: 'PATCH', body: { to_status: v.to_status, note: v.note || '', expected_updated_at: c.updated_at } }),
     { form, success: 'Đã đổi trạng thái.', onDone });
   const next = nextStatuses(c);
   if (!next.length) return null;

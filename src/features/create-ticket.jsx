@@ -23,7 +23,7 @@ export function checkFiles(files) {
   return null;
 }
 
-const createTicket = (formData) => api('/api/complaints', { method: 'POST', form: formData });   // multipart
+const createTicket = (formData) => api('/api/feedbacks', { method: 'POST', form: formData });   // multipart
 const opt = (arr) => arr.map((v) => ({ value: v, label: v }));
 
 /* ---------- Form tạo phiếu ---------- */

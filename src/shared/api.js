@@ -2,7 +2,7 @@
 //
 // Lớp shared KHÔNG được biết về phiên đăng nhập (đó là nghiệp vụ của entities/user).
 // Vì vậy tầng app "tiêm" hai hàm qua configureApi() lúc khởi động (dependency injection).
-import { USE_MOCK, API_BASE_URL } from './config.js';
+import {  API_BASE_URL } from './config.js';
 
 // Lỗi chuẩn hoá từ API: 400, 401, 403, 404, 409, 429
 export class ApiError extends Error {
@@ -26,24 +26,22 @@ export function defaultMessage(status) {
   }[status] || 'Có lỗi xảy ra, vui lòng thử lại.';
 }
 
-let hooks = { getToken: () => null, onUnauthorized: () => {} };
+let hooks = { getToken: () => null, getCustomerId: () => null, onUnauthorized: () => {} };
 export const configureApi = (h) => { hooks = { ...hooks, ...h }; };
 
 /**
- * @param {string} path  ví dụ '/api/complaints/mine'
- * @param {{method?:string, body?:object, form?:FormData, auth?:boolean}} opts
- *   - body: gửi JSON; form: gửi multipart (upload file)
- *   - auth:false cho login/register (401 không có nghĩa là hết phiên)
+- @param {string} path  ví dụ '/api/feedbacks/mine'
+- @param {{method?:string, body?:object, form?:FormData, auth?:boolean}} opts
+-   - body: gửi JSON; form: gửi multipart (upload file)
+-   - auth:false cho login/register (401 không có nghĩa là hết phiên)
  */
 export async function api(path, { method = 'GET', body, form, auth = true } = {}) {
   const token = hooks.getToken();
+  const customerId = hooks.getCustomerId?.();
   try {
-    if (USE_MOCK) {
-      const { handle } = await import('./mock.js');
-      return await handle({ method, path, body, form, token });
-    }
     const headers = {};
     if (token) headers.Authorization = `Bearer ${token}`;
+    if (customerId) headers['X-Customer-Id'] = String(customerId);
     if (body) headers['Content-Type'] = 'application/json';
 
     let res;
@@ -60,3 +58,4 @@ export async function api(path, { method = 'GET', body, form, auth = true } = {}
     throw e;
   }
 }
+

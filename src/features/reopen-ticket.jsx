@@ -4,7 +4,7 @@ import { api } from '@shared/api.js';
 import { useAction } from '@shared/ui.jsx';
 import { MAX_REOPEN } from '@entities/ticket.jsx';
 
-const reopenTicket = (id, reason) => api(`/api/complaints/${id}/reopen`, { method: 'POST', body: { reason } });
+const reopenTicket = (id, reason) => api(`/api/feedbacks/${id}/reopen`, { method: 'POST', body: { reason } });
 
 export function ReopenForm({ ticket, onDone }) {
   const [form] = Form.useForm();

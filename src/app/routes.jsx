@@ -5,7 +5,6 @@ import { homeFor, useAuth } from '@entities/user.jsx';
 import { LandingPage } from '@pages/landing.jsx';
 import { LoginPage } from '@pages/login.jsx';
 import { RegisterPage } from '@pages/register.jsx';
-import { OtpPage } from '@pages/otp.jsx';
 import { ForgotPage } from '@pages/forgot.jsx';
 import { NewTicketPage } from '@pages/customer-new-ticket.jsx';
 import { HistoryPage } from '@pages/customer-history.jsx';
@@ -17,7 +16,6 @@ import { MyTasksPage } from '@pages/dept-tasks.jsx';
 import { TaskDetailPage } from '@pages/dept-task.jsx';
 import { DashboardPage } from '@pages/manager-dashboard.jsx';
 import { EscalatedPage } from '@pages/manager-escalated.jsx';
-import { AdminPage } from '@pages/admin.jsx';
 import { ForbiddenPage, NotFoundPage } from '@pages/errors.jsx';
 
 // roles: null = công khai | 'guest' = chỉ khi CHƯA đăng nhập | [..] = các vai trò được vào
@@ -33,12 +31,11 @@ function Guard({ roles, children }) {
   return children;
 }
 
-const CUSTOMER = ['customer'], STAFF = ['cs_staff'], DEPT = ['dept_staff'], MANAGER = ['manager'], ADMIN = ['admin'];
+const CUSTOMER = ['customer'], STAFF = ['cs_staff'], DEPT = ['dept_staff'], MANAGER = ['manager'];
 
 const ROUTES = [
   // Công khai
   ['/register', 'guest', <RegisterPage />],
-  ['/otp', 'guest', <OtpPage />],
   ['/login', 'guest', <LoginPage />],
   ['/forgot', 'guest', <ForgotPage />],
   // Khách hàng
@@ -56,8 +53,6 @@ const ROUTES = [
   ['/manager/dashboard', MANAGER, <DashboardPage />],
   ['/manager/escalated', MANAGER, <EscalatedPage />],
   ['/manager/complaints/:id', MANAGER, <TicketDetailPage />],
-  // Quản trị
-  ['/admin', ADMIN, <AdminPage />],
 ];
 
 function Home() {

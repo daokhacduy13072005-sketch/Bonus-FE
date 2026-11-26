@@ -8,7 +8,7 @@ import './features.css';
 export function RespondCard({ ticket: c, onDone }) {
   const [form] = Form.useForm();
   const [submit, loading] = useAction(
-    (v) => api(`/api/complaints/${c.id}/responses`, { method: 'POST', body: { content: v.content, solution: v.solution || '', is_internal: !!v.is_internal } }),
+    (v) => api(`/api/feedbacks/${c.id}/responses`, { method: 'POST', body: { content: v.content, solution: v.solution || '', is_internal: !!v.is_internal } }),
     { form, success: 'Đã gửi.', onDone: async () => { form.resetFields(); await onDone(); } });
   const closed = c.status === 'Closed';
   const critNeedsApproval = c.priority === 'Critical' && c.type === 'complaint' && c.approval?.decision !== 'approved';

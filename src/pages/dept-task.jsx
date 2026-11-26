@@ -29,7 +29,7 @@ export function TaskDetailPage() {
             { key: 'p', label: 'Ưu tiên', children: <PriorityTag priority={c.priority} /> },
             { key: 'st', label: 'Trạng thái phiếu', children: <StatusTag status={c.status} /> },
             { key: 'h', label: 'Hạn', children: fmt(a.due_at) },
-            { key: 'l', label: '📍 Vị trí sự cố', span: 2, children: locationText(c.location) },
+            { key: 'l', label: ' Vị trí sự cố', span: 2, children: locationText(c.location) },
           ]} />
           <h3 className="sec-title">Nội dung khiếu nại</h3>
           <p className="pre">{c.description}</p>

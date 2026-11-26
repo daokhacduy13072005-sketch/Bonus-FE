@@ -9,7 +9,6 @@ export const ROLES = {
   cs_staff: 'Nhân viên CSKH',
   dept_staff: 'Nhân viên bộ phận',
   manager: 'Quản lý CSKH',
-  admin: 'Quản trị hệ thống',
 };
 
 // Trang chủ theo vai trò (SC-06)
@@ -18,7 +17,6 @@ export const HOME = {
   cs_staff: '/staff/queue',
   dept_staff: '/dept/tasks',
   manager: '/manager/dashboard',
-  admin: '/admin',
 };
 export const homeFor = (role) => HOME[role] || '/';
 
