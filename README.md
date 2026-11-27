@@ -22,12 +22,12 @@ src/
 ├── pages/      MỖI TRANG MỘT FILE — chỉ ghép widgets + features
 │   landing  login  register  forgot  errors
 │   customer-new-ticket  customer-history  customer-track  customer-ticket  customer-profile
-│   staff-queue  staff-customers  staff-directory  ticket-detail  manager-dashboard  manager-escalated  dept-tasks  dept-task
+│   staff-queue  staff-customers  staff-directory  ticket-detail  manager-dashboard  manager-escalated  manager-accounts  dept-tasks  dept-task
 ├── widgets/    khối giao diện lớn: app-header · site-footer · auth-shell · ticket-table · ticket-stats
 ├── features/   MỖI HÀNH ĐỘNG MỘT FILE (form + gọi API + luật kiểm tra)
-│   auth  create-ticket  track-ticket  rate-ticket  reopen-ticket  filter-tickets  customer-profile
+│   auth  create-ticket  track-ticket  rate-ticket  reopen-ticket  filter-tickets  customer-profile  manage-accounts
 │   classify-ticket  assign-ticket  respond-ticket  change-status  escalate-ticket  approve-ticket  merge-ticket  upload-attachment  submit-task-result
-├── entities/   thực thể nghiệp vụ: ticket (từ điển, API, tag, timeline) · user (vai trò, phiên) · customer · staff · category · assignment · department
+├── entities/   thực thể nghiệp vụ: ticket (từ điển, API, tag, timeline) · user (vai trò, phiên) · customer · staff · category · assignment · department · account
 └── shared/     không biết nghiệp vụ: api · config · lib (hook, format) · ui (khối dùng chung) · styles.css
 ```
 
@@ -134,3 +134,66 @@ hero nền chuyển màu + thẻ minh hoạ nổi. Tự tắt khi hệ điều h
 | `/customer/profile` | `customer` | Hồ sơ cá nhân & hợp đồng thuê của cư dân |
 | `/staff/customers` | `cs_staff`, `manager` | Danh sách & chỉnh sửa liên hệ cư dân |
 | `/staff/directory` | `cs_staff`, `manager` | Danh sách nhân sự & danh mục phản hồi |
+| `/accounts` | `cs_staff`, `manager` | Quản lý tài khoản nhân viên & khách hàng |
+
+---
+
+### 4. Bổ sung 2026-11-27 — Quản lý Account
+
+#### Entity & API mới (`src/entities/account.js`)
+
+Thêm entity `account` chứa toàn bộ hằng số nhãn/màu và các hàm gọi API tập trung:
+
+- **Staff accounts:** `listStaffAccounts`, `createStaffAccount`, `updateStaffAccount`, `resetStaffPassword`, `toggleStaffStatus`
+- **Customer accounts:** `listCustomerAccounts`, `updateCustomerAccount`, `patchCustomerAccount`, `resetCustomerPassword`
+
+#### Feature mới (`src/features/manage-accounts.jsx`)
+
+Các component dùng lại trong trang quản lý:
+
+- `StaffAccountForm` — form tạo / sửa tài khoản nhân viên (họ tên, email, SĐT, vai trò, bộ phận, mật khẩu tạm khi tạo mới).
+- `StaffAccountActions` — khoá/mở khoá & đặt lại mật khẩu nhân viên (Popconfirm chống bấm nhầm).
+- `StaffAccountCard` — thẻ Descriptions hiển thị thông tin chi tiết nhân viên.
+- `CustomerAccountForm` — form sửa thông tin liên hệ khách hàng.
+- `CustomerAccountActions` — khoá/mở khoá KH, xác minh cư dân, xóa vi phạm spam, đặt lại mật khẩu KH.
+- `CustomerAccountCard` — thẻ Descriptions chi tiết tài khoản khách hàng.
+- `AccountStatusBadge` — badge hiển thị trạng thái account (active / locked / inactive).
+
+#### Trang mới (`src/pages/manager-accounts.jsx`)
+
+Trang `/accounts` với 2 tab:
+
+- **Tab "Tài khoản nhân viên"** — bảng có search theo tên/email/vai trò/bộ phận, bấm "Chi tiết" mở Modal xem + sửa + hành động; nút "Tạo tài khoản nhân viên" chỉ hiện cho `manager`.
+- **Tab "Tài khoản khách hàng"** — bảng có search, badge vi phạm spam, Modal chi tiết tích hợp form sửa thông tin + toàn bộ actions.
+
+#### Phân quyền
+
+| Chức năng | `cs_staff` | `manager` |
+|---|:---:|:---:|
+| Xem danh sách nhân viên | ✅ | ✅ |
+| Tạo / sửa tài khoản nhân viên | ❌ | ✅ |
+| Khoá / đặt lại MK nhân viên | ❌ | ✅ |
+| Xem / sửa thông tin KH | ✅ | ✅ |
+| Khoá / mở khoá / xác minh KH | ✅ | ✅ |
+| Xóa vi phạm spam KH | ✅ | ✅ |
+| Đặt lại MK khách hàng | ✅ | ✅ |
+
+#### Route & Nav (`src/app/routes.jsx`, `src/widgets/app-header.jsx`)
+
+- Thêm route `/accounts` → `STAFF_OR_MANAGER` → `<AccountManagementPage />`.
+- Thêm mục **"Quản lý Account"** vào thanh nav của cả `cs_staff` và `manager`.
+
+#### API endpoints kỳ vọng backend
+
+```
+GET   /api/accounts/staff
+POST  /api/accounts/staff
+PUT   /api/accounts/staff/:id
+POST  /api/accounts/staff/:id/reset-password
+PATCH /api/accounts/staff/:id/status          { active }
+
+GET   /api/accounts/customers
+PUT   /api/accounts/customers/:id
+PATCH /api/accounts/customers/:id/status      { blocked?, spamStrikes?, verifiedResident? }
+POST  /api/accounts/customers/:id/reset-password
+```

@@ -19,6 +19,7 @@ import { MyTasksPage } from '@pages/dept-tasks.jsx';
 import { TaskDetailPage } from '@pages/dept-task.jsx';
 import { DashboardPage } from '@pages/manager-dashboard.jsx';
 import { EscalatedPage } from '@pages/manager-escalated.jsx';
+import { AccountManagementPage } from '@pages/manager-accounts.jsx';
 import { ForbiddenPage, NotFoundPage } from '@pages/errors.jsx';
 
 // roles: null = công khai | 'guest' = chỉ khi CHƯA đăng nhập | [..] = các vai trò được vào
@@ -59,6 +60,8 @@ const ROUTES = [
   ['/manager/dashboard', MANAGER, <DashboardPage />],
   ['/manager/escalated', MANAGER, <EscalatedPage />],
   ['/manager/complaints/:id', MANAGER, <TicketDetailPage />],
+  // Quản lý tài khoản (manager toàn quyền, cs_staff xem + hành động khách hàng)
+  ['/accounts', STAFF_OR_MANAGER, <AccountManagementPage />],
 ];
 
 function Home() {
