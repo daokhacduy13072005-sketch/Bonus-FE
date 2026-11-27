@@ -19,7 +19,7 @@ export function MyTasksPage() {
             locale={{ emptyText: <EmptyState text="Chưa có việc nào được giao cho bộ phận của bạn." /> }}
             onRow={(a) => ({ onClick: () => navigate(href(a)) })}
             columns={[
-              { title: 'Mã', width: 110, render: (_, a) => <CodeLink to={href(a)} code={a.complaint.tracking_code} /> },
+              { title: 'Mã', width: 175, render: (_, a) => <CodeLink to={href(a)} code={a.complaint.tracking_code} /> },
               { title: 'Nội dung', render: (_, a) => <><div style={{ fontWeight: 600 }}>{a.complaint.title}</div><div className="mu">{locationText(a.complaint.location)} · {a.complaint.service}</div></> },
               { title: 'Ưu tiên', render: (_, a) => <PriorityTag priority={a.complaint.priority} /> },
               { title: 'Hạn xử lý', responsive: ['md'], render: (_, a) => fmt(a.due_at) },

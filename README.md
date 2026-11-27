@@ -11,8 +11,7 @@ npm install
 npm run dev                 # mở http://localhost:5173
 ```
 
-- `.env` (sao chép từ `.env.example`) → `VITE_USE_MOCK=true`: dùng dữ liệu giả (không cần backend). Đăng nhập bằng nút chọn vai trò ở trang đăng nhập (mật khẩu `Demo@1234`).
-- Đổi `VITE_USE_MOCK=false` (và `VITE_API_URL`) để gọi backend thật. Sau khi sửa `.env` phải chạy lại `npm run dev`.
+- `.env` (sao chép từ `.env.example`), cấu hình `VITE_API_URL` (mặc định `http://localhost:8080`) để gọi backend. Sau khi sửa `.env` phải chạy lại `npm run dev`.
 - `npm run check:fsd` kiểm tra tự động luật kiến trúc · `npm run build` đóng gói.
 
 ## Tìm code ở đâu? (Ctrl+P rồi gõ tên file)
@@ -21,20 +20,20 @@ npm run dev                 # mở http://localhost:5173
 src/
 ├── app/        index.jsx (providers, vỏ trang, hiệu ứng chuyển trang) · routes.jsx (bảng route + phân quyền) · theme.js (màu/font antd)
 ├── pages/      MỖI TRANG MỘT FILE — chỉ ghép widgets + features
-│   landing  login  register  otp  forgot  admin  errors
-│   customer-new-ticket  customer-history  customer-track  customer-ticket
-│   staff-queue  ticket-detail  manager-dashboard  manager-escalated  dept-tasks  dept-task
+│   landing  login  register  forgot  errors
+│   customer-new-ticket  customer-history  customer-track  customer-ticket  customer-profile
+│   staff-queue  staff-customers  staff-directory  ticket-detail  manager-dashboard  manager-escalated  dept-tasks  dept-task
 ├── widgets/    khối giao diện lớn: app-header · site-footer · auth-shell · ticket-table · ticket-stats
 ├── features/   MỖI HÀNH ĐỘNG MỘT FILE (form + gọi API + luật kiểm tra)
-│   auth  create-ticket  track-ticket  rate-ticket  reopen-ticket  filter-tickets
-│   classify-ticket  assign-ticket  respond-ticket  change-status  escalate-ticket  approve-ticket  submit-task-result
-├── entities/   thực thể nghiệp vụ: ticket (từ điển, API, tag, timeline) · user (vai trò, phiên) · assignment · department
-└── shared/     không biết nghiệp vụ: api · config · lib (hook, format) · ui (khối dùng chung) · mock · styles.css
+│   auth  create-ticket  track-ticket  rate-ticket  reopen-ticket  filter-tickets  customer-profile
+│   classify-ticket  assign-ticket  respond-ticket  change-status  escalate-ticket  approve-ticket  merge-ticket  upload-attachment  submit-task-result
+├── entities/   thực thể nghiệp vụ: ticket (từ điển, API, tag, timeline) · user (vai trò, phiên) · customer · staff · category · assignment · department
+└── shared/     không biết nghiệp vụ: api · config · lib (hook, format) · ui (khối dùng chung) · styles.css
 ```
 
 Luật phụ thuộc (kiểm tra bằng `npm run check:fsd`): **app → pages → widgets → features → entities → shared**.
 Tầng trên được import tầng dưới, không ngược lại; hai file cùng tầng không import nhau.
-Ví dụ `ticket-detail` ghép 6 feature, còn các feature không biết nhau.
+Ví dụ `ticket-detail` ghép nhiều feature, còn các feature không biết nhau.
 
 ## Ant Design dùng ở đâu
 
@@ -42,10 +41,10 @@ Ví dụ `ticket-detail` ghép 6 feature, còn các feature không biết nhau.
 |---|---|
 | `ConfigProvider` + `theme` | `app/theme.js` — đổi màu thương hiệu, bo góc, font một chỗ |
 | `Form` + `rules` | mọi form: kiểm tra từng ô, lỗi hiện đúng dưới ô nhập |
-| `Table`, `Tabs`, `Tag` | `widgets/ticket-table`, `pages/staff-queue`, trạng thái/ưu tiên |
-| `Steps`, `Timeline`, `Descriptions` | tiến độ phiếu, lịch sử, thông tin chi tiết |
-| `Upload.Dragger`, `Input.OTP`, `Rate`, `DatePicker` | tạo phiếu, OTP, đánh giá, bộ lọc ngày |
-| `Progress`, `Card`, `Result`, `Skeleton` | dashboard, 404/403, trạng thái đang tải |
+| `Table`, `Tabs`, `Tag` | `widgets/ticket-table`, `pages/staff-queue`, `pages/staff-customers`, `pages/staff-directory` |
+| `Steps`, `Timeline`, `Descriptions` | tiến độ phiếu, lịch sử, thông tin chi tiết, hồ sơ cư dân |
+| `Upload.Dragger`, `Rate`, `DatePicker` | tạo phiếu, bổ sung đính kèm, đánh giá, hợp đồng thuê, bộ lọc ngày |
+| `Progress`, `Card`, `Result`, `Skeleton` | dashboard, điểm tin cậy cư dân, 404/403, trạng thái đang tải |
 
 ## Hiệu ứng chuyển động (nằm trong `shared/styles.css`, `shared/ui.jsx`)
 
@@ -63,6 +62,75 @@ hero nền chuyển màu + thẻ minh hoạ nổi. Tự tắt khi hệ điều h
 
 ## Việc còn mở
 
-- Màn Quản trị (UC-18→21) và Quên mật khẩu chưa có trong Screen Flow — vẫn là trang giữ chỗ.
-- Danh sách tòa nhà và giới hạn tệp đính kèm là giá trị tạm, cần chốt với nhóm.
-- Chưa có chế độ tối (bản JS thuần cũ có). Dữ liệu giả chỉ để demo, không thay thế backend.
+- Màn Quên mật khẩu chưa có trong Screen Flow — vẫn là trang giữ chỗ.
+- Danh sách tòa nhà hiện khai báo tĩnh ở FE (giới hạn tệp đính kèm đã chốt khớp BE: tối đa 5 tệp, 10 MB/tệp).
+- Chưa có chế độ tối (bản JS thuần cũ có).
+
+---
+
+## Nhật ký sửa lỗi & bổ sung tính năng FE
+
+### 1. Các lỗi đã sửa (Bug Fixes)
+
+1. **Sửa lỗi không gửi được phản hồi (`src/features/create-ticket.jsx`)**
+   - Chuyển `POST /api/feedbacks` từ `FormData` (`multipart/form-data`) sang `application/json` khớp `CreateFeedbackRequestDto` của BE (`customerId`, `type` viết hoa, `content`, `serviceName`, `location`, `apartmentCode`).
+   - Tách bước upload tệp đính kèm sang `POST /api/feedbacks/{id}/attachments` với field `file` cho từng tệp.
+   - Đọc mã phiếu trả về từ `res.code || res.tracking_code` thay vì chỉ `res.tracking_code`.
+   - Cập nhật `FILE_RULES` khớp cấu hình BE: tối đa 5 tệp, 10 MB/tệp, hỗ trợ `jpg, jpeg, png, webp, gif, pdf`.
+
+2. **Sửa lỗi tra cứu & xem chi tiết phiếu theo mã (`src/entities/ticket.jsx`, `src/features/track-ticket.jsx`)**
+   - Sửa `getTicket(idOrCode)`: nhận diện nếu là số thì gọi `GET /api/feedbacks/{id}`, nếu là mã tra cứu (vd `FB-20261126-0001`) thì gọi `GET /api/feedbacks/code/{code}`, tránh lỗi 400 `"Tham số 'id' không đúng định dạng"`.
+   - Gọi thêm `GET /api/feedbacks/{id}/attachments` để lấy danh sách tệp đính kèm và gắn link tải từ `fileUrl`.
+   - Chuẩn hóa dữ liệu (`normalizeTicket`) dùng chung cho `listTickets`, `listMyTickets`, `getTicket` (map `content` → `description`, `serviceName` → `service`, trạng thái `WAITING_INFO`/`REJECTED`/`MERGED`, loại `PROPOSAL`, mức ưu tiên, và giá trị mặc định cho `history`/`responses`/`assignments` để tránh crash trang chi tiết).
+   - Mở rộng regex nhập mã phiếu trong `TrackForm` từ 6 ký tự lên `4–24` ký tự gồm chữ, số và dấu `-`.
+
+3. **Sửa lỗi hiển thị mã phiếu bị xuống dòng (`src/shared/styles.css`, `src/widgets/ticket-table.jsx`, `src/pages/dept-tasks.jsx`, `src/features/features.css`)**
+   - Thêm `display: inline-block; white-space: nowrap;` cho `.code-link`.
+   - Tăng độ rộng cột `Mã` trong bảng từ `110` lên `175` và giảm `letter-spacing` của `.code-input` / `.big-code` xuống `2px`.
+
+4. **Sửa lỗi nút form xoay mãi khi gặp lỗi (`src/shared/ui.jsx`)**
+   - Trong `useAction`, cập nhật `useEffect` gán lại `mounted.current = true` khi component mount/remount dưới `<React.StrictMode>`, đảm bảo `setLoading(false)` luôn chạy ở `finally`.
+
+5. **Sửa lỗi đăng ký & phân quyền Manager (`src/features/auth.jsx`)**
+   - Sửa payload `RegisterForm` từ `full_name`, `apartment_code` sang `fullName`, `apartmentCode` khớp `RegisterRequestDto`.
+   - Map role `CS_MANAGER` từ BE về `'manager'` trong `LoginForm` để tài khoản Quản lý CSKH truy cập đúng `/manager/dashboard` và `/manager/*`.
+
+6. **Đồng bộ tài liệu & dọn trang không dùng (`README.md`, `src/app/routes.jsx`, `src/entities/user.jsx`, `src/widgets/app-header.jsx`)**
+   - Xóa `src/pages/admin.jsx` và gỡ các tham chiếu `/admin`.
+   - Bỏ hướng dẫn `VITE_USE_MOCK` cũ vì dự án đã kết nối backend thật.
+
+### 2. Các chức năng mới đã bổ sung (New Features)
+
+1. **Đăng ký đầy đủ theo `RegisterRequestDto` (`src/features/auth.jsx`)**
+   - Bổ sung ô nhập **Mã căn hộ (`apartmentCode`)**.
+   - Bổ sung chọn **Loại cư dân (`residentType`)**: `OWNER` (Chủ căn hộ) hoặc `TENANT` (Người thuê).
+   - Khi chọn `TENANT`, hiển thị chọn **Thời hạn hợp đồng thuê** (`rentalContractStartDate`, `rentalContractEndDate`).
+   - Hiển thị thông báo rõ ràng khi tài khoản mới ở trạng thái `PENDING` chờ Ban quản lý duyệt.
+
+2. **Hồ sơ cư dân & quản lý danh sách cư dân (`src/entities/customer.js`, `src/features/customer-profile.jsx`, `src/pages/customer-profile.jsx`, `src/pages/staff-customers.jsx`)**
+   - **Cư dân (`/customer/profile`)**: xem thông tin căn hộ, trạng thái xác minh, điểm tin cậy (`ratingTrustScore`), số lần vi phạm (`spamStrikes`), danh sách hợp đồng thuê (`rentalContracts`) và tự cập nhật họ tên, email, SĐT qua `GET/PUT /api/customers/me` (chặn tự sửa khi tài khoản đang bị khóa `blocked`).
+   - **CSKH / Quản lý (`/staff/customers`)**: xem danh sách cư dân (`GET /api/customers`), tìm kiếm theo tên/căn hộ/email/SĐT, xem chi tiết và sửa thông tin liên hệ cư dân (`PUT /api/customers/{id}`).
+
+3. **Danh mục phản hồi động & Danh sách nhân sự (`src/entities/category.js`, `src/entities/staff.js`, `src/pages/staff-directory.jsx`, `src/features/create-ticket.jsx`)**
+   - Bổ sung trang **`/staff/directory`** cho CSKH/Quản lý xem danh sách nhân sự (`GET /api/staff`: vai trò, bộ phận, trạng thái hoạt động, đang trực ca) và danh mục phân loại tự động (`GET /api/categories`: mã, nhóm, ưu tiên mặc định, từ khóa).
+   - Trong form tạo phiếu (`src/features/create-ticket.jsx`), bổ sung chọn **Danh mục sự cố (`categoryId`)**, chọn **Nhân viên liên quan (`aboutStaffId`)**, và cảnh báo chặn gửi nếu `user.blocked === true`.
+
+4. **Gộp phiếu trùng lặp (`src/features/merge-ticket.jsx`, `src/pages/ticket-detail.jsx`)**
+   - Hiển thị cảnh báo các phiếu nghi trùng (`suspectedDuplicateIds`) có link bấm tới từng phiếu.
+   - Cho phép CSKH / Quản lý nhập ID phiếu gốc + ghi chú và gọi `POST /api/feedbacks/{id}/merge`.
+
+5. **Upload bổ sung tệp đính kèm & Phân trang server (`src/features/upload-attachment.jsx`, `src/pages/customer-history.jsx`, `src/widgets/ticket-table.jsx`)**
+   - Bổ sung `UploadAttachmentCard` ở trang chi tiết phiếu của cư dân (`/customer/complaints/:code`) để tải thêm tệp đính kèm cho phiếu chưa kết thúc.
+   - Bổ sung phân trang phía server (`page`, `size`, `totalElements`) cho `GET /api/feedbacks/mine` tại trang **Phiếu của tôi**.
+
+6. **Hiển thị thông tin xử lý & lọc danh sách (`src/pages/customer-ticket.jsx`, `src/pages/ticket-detail.jsx`, `src/pages/staff-queue.jsx`, `src/pages/manager-escalated.jsx`)**
+   - Hiển thị thêm các nhãn & thông tin từ BE: `Ngoài giờ` (`afterHours`), `Thiếu thông tin` (`missingInfo`), `Cần duyệt` (`requiresManagerApproval`), thông tin gộp trùng (`duplicateOfId`, `duplicateCount`), độ tin cậy phân loại tự động (`classifiedBy`, `autoConfidence`), hạn SLA (`responseDueAt`, `resolveDueAt`), và tên nhân sự phụ trách (`assignedStaffId`).
+   - Bổ sung lọc phía client dự phòng trên `StaffQueuePage` (thêm tab `proposal`) và `EscalatedPage`, đồng thời bọc `.catch(() => [])` cho `getDepartments()` để không làm lỗi trang chi tiết khi BE chưa có `/api/meta`.
+
+### 3. Route mới đã thêm (`src/app/routes.jsx`, `src/widgets/app-header.jsx`)
+
+| Đường dẫn | Vai trò | Chức năng |
+|---|---|---|
+| `/customer/profile` | `customer` | Hồ sơ cá nhân & hợp đồng thuê của cư dân |
+| `/staff/customers` | `cs_staff`, `manager` | Danh sách & chỉnh sửa liên hệ cư dân |
+| `/staff/directory` | `cs_staff`, `manager` | Danh sách nhân sự & danh mục phản hồi |

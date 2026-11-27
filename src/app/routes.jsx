@@ -10,7 +10,10 @@ import { NewTicketPage } from '@pages/customer-new-ticket.jsx';
 import { HistoryPage } from '@pages/customer-history.jsx';
 import { TrackPage } from '@pages/customer-track.jsx';
 import { CustomerTicketPage } from '@pages/customer-ticket.jsx';
+import { CustomerProfilePage } from '@pages/customer-profile.jsx';
 import { StaffQueuePage } from '@pages/staff-queue.jsx';
+import { StaffCustomersPage } from '@pages/staff-customers.jsx';
+import { StaffDirectoryPage } from '@pages/staff-directory.jsx';
 import { TicketDetailPage } from '@pages/ticket-detail.jsx';
 import { MyTasksPage } from '@pages/dept-tasks.jsx';
 import { TaskDetailPage } from '@pages/dept-task.jsx';
@@ -31,7 +34,7 @@ function Guard({ roles, children }) {
   return children;
 }
 
-const CUSTOMER = ['customer'], STAFF = ['cs_staff'], DEPT = ['dept_staff'], MANAGER = ['manager'];
+const CUSTOMER = ['customer'], STAFF = ['cs_staff'], DEPT = ['dept_staff'], MANAGER = ['manager'], STAFF_OR_MANAGER = ['cs_staff', 'manager'];
 
 const ROUTES = [
   // Công khai
@@ -43,9 +46,12 @@ const ROUTES = [
   ['/customer/history', CUSTOMER, <HistoryPage />],
   ['/customer/track', CUSTOMER, <TrackPage />],
   ['/customer/complaints/:code', CUSTOMER, <CustomerTicketPage />],
+  ['/customer/profile', CUSTOMER, <CustomerProfilePage />],
   // Nhân viên CSKH
   ['/staff/queue', STAFF, <StaffQueuePage />],
   ['/staff/complaints/:id', STAFF, <TicketDetailPage />],
+  ['/staff/customers', STAFF_OR_MANAGER, <StaffCustomersPage />],
+  ['/staff/directory', STAFF_OR_MANAGER, <StaffDirectoryPage />],
   // Nhân viên bộ phận
   ['/dept/tasks', DEPT, <MyTasksPage />],
   ['/dept/tasks/:id', DEPT, <TaskDetailPage />],

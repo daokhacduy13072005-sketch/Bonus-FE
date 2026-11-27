@@ -9,8 +9,8 @@ export function TrackForm() {
   return (
     <Form layout="vertical" size="large" requiredMark={false} onFinish={({ code }) => navigate('/customer/complaints/' + code.trim().toUpperCase())}>
       <Form.Item name="code" label="Mã phiếu" normalize={(v) => (v || '').toUpperCase()}
-        rules={[{ required: true, pattern: /^[A-Z0-9]{6}$/, message: 'Mã phiếu gồm 6 ký tự chữ/số, ví dụ A1B2C3.' }]}>
-        <Input prefix={<SearchOutlined />} placeholder="XXXXXX" maxLength={6} autoComplete="off" className="code-input" />
+        rules={[{ required: true, pattern: /^[A-Z0-9-]{4,24}$/, message: 'Nhập mã phiếu hợp lệ, ví dụ FB-20261126-0001.' }]}>
+        <Input prefix={<SearchOutlined />} placeholder="FB-20261126-0001" maxLength={24} autoComplete="off" className="code-input" />
       </Form.Item>
       <Button type="primary" htmlType="submit" block className="btn-accent">Tra cứu</Button>
     </Form>

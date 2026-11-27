@@ -1,6 +1,6 @@
 /* CSS riêng của các feature (form, thẻ hành động) */
-.code-input.ant-input-affix-wrapper input { text-align: center; font: 700 20px ui-monospace, Menlo, monospace; letter-spacing: 6px; }
-.big-code { font: 800 32px/1.2 ui-monospace, Menlo, monospace; letter-spacing: 6px; padding: 16px 28px; margin: 0 auto 14px; width: fit-content; background: var(--pr-soft); color: var(--pr); border: 2px dashed var(--pr); border-radius: 14px; user-select: all; animation: pop .5s var(--ease) both; }
+.code-input.ant-input-affix-wrapper input { text-align: center; font: 700 17px ui-monospace, Menlo, monospace; letter-spacing: 2px; }
+.big-code { font: 800 26px/1.2 ui-monospace, Menlo, monospace; letter-spacing: 2px; padding: 16px 28px; margin: 0 auto 14px; width: fit-content; background: var(--pr-soft); color: var(--pr); border: 2px dashed var(--pr); border-radius: 14px; user-select: all; animation: pop .5s var(--ease) both; }
 @keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
 .loc-card.ant-card { background: #f8fafc; border-radius: 14px; }
 .loc-card .ant-card-head { color: var(--pr); min-height: 44px; }

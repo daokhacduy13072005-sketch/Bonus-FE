@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Alert, Steps, Tag, Timeline, Typography } from 'antd';
 import { CheckCircleFilled, ClockCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { api } from '@shared/api.js';
+import { API_BASE_URL } from '@shared/config.js';
 import { fmt, sizeText } from '@shared/lib.js';
 
 const { Text } = Typography;
@@ -12,7 +13,8 @@ const { Text } = Typography;
 // Loại phản hồi (BR-02, SC-07)
 export const TYPE_LABEL = {
   complaint: 'Khiếu nại',
-  suggestion: 'Góp ý, đề xuất',
+  suggestion: 'Góp ý',
+  proposal: 'Đề xuất',
   praise: 'Khen ngợi',
   staff_feedback: 'Phản hồi về tiến độ / thái độ nhân viên',
 };
@@ -30,13 +32,18 @@ export const ROOM_RE = /^[A-Za-z0-9-]{1,10}$/;
 
 // Vòng đời trạng thái (BR-07; các trạng thái trung gian là đề xuất)
 export const STATUS_LABEL = {
-  New: 'Mới', Assigned: 'Đã phân công', InProgress: 'Đang xử lý', PendingApproval: 'Chờ duyệt',
-  Resolved: 'Đã giải quyết', Closed: 'Đã đóng', Reopened: 'Mở lại',
+  New: 'Mới', Assigned: 'Đã phân công', InProgress: 'Đang xử lý', WaitingInfo: 'Chờ bổ sung',
+  PendingApproval: 'Chờ duyệt', Resolved: 'Đã giải quyết', Closed: 'Đã đóng', Reopened: 'Mở lại',
+  Rejected: 'Từ chối', Merged: 'Đã gộp',
 };
 export const PRIORITY_LABEL = { Low: 'Thấp', Medium: 'Trung bình', High: 'Cao', Critical: 'Khẩn cấp' };
 
 // Màu của Tag antd theo trạng thái / mức ưu tiên
-export const STATUS_COLOR = { New: 'volcano', Assigned: 'blue', InProgress: 'processing', PendingApproval: 'orange', Resolved: 'success', Closed: 'default', Reopened: 'error' };
+export const STATUS_COLOR = {
+  New: 'volcano', Assigned: 'blue', InProgress: 'processing', WaitingInfo: 'gold',
+  PendingApproval: 'orange', Resolved: 'success', Closed: 'default', Reopened: 'error',
+  Rejected: 'default', Merged: 'default',
+};
 export const PRIORITY_COLOR = { Low: 'green', Medium: 'blue', High: 'orange', Critical: 'red' };
 
 // Chuyển trạng thái nhân viên được phép (UI chỉ gợi ý; backend mới là nơi quyết định)
@@ -64,42 +71,107 @@ export function locationText(loc) {
 
 /* ===================== 2. GỌI API ===================== */
 
-export const listTickets = (params) => api('/api/feedbacks' + (params ? '?' + new URLSearchParams(params) : ''));
-export const listMyTickets = async () => {
-  const response = await api('/api/feedbacks/mine');
+const STATUS_MAP = {
+  NEW: 'New',
+  ASSIGNED: 'Assigned',
+  IN_PROGRESS: 'InProgress',
+  WAITING_INFO: 'WaitingInfo',
+  PENDING_APPROVAL: 'PendingApproval',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+  REOPENED: 'Reopened',
+  REJECTED: 'Rejected',
+  MERGED: 'Merged',
+};
+
+const TYPE_MAP = {
+  COMPLAINT: 'complaint',
+  SUGGESTION: 'suggestion',
+  PROPOSAL: 'proposal',
+  PRAISE: 'praise',
+};
+
+function normalizeTicket(ticket, attachments) {
+  const status = STATUS_MAP[ticket.status] || ticket.status;
+  const createdAt = ticket.created_at ?? ticket.createdAt;
+  const updatedAt = ticket.updated_at ?? ticket.updatedAt ?? createdAt;
+  const priority = ticket.priority === 'NORMAL'
+    ? 'Medium'
+    : ticket.priority && /^[A-Z_]+$/.test(ticket.priority)
+      ? ticket.priority[0] + ticket.priority.slice(1).toLowerCase()
+      : ticket.priority;
+
+  return {
+    ...ticket,
+    tracking_code: ticket.tracking_code ?? ticket.code,
+    created_at: createdAt,
+    updated_at: updatedAt,
+    description: ticket.description ?? ticket.content ?? '',
+    service: ticket.service ?? ticket.serviceName ?? 'Khác',
+    location: ticket.location ?? ticket.apartmentCode,
+    type: TYPE_MAP[ticket.type] || ticket.type,
+    status,
+    priority,
+    customer: ticket.customer ?? {
+      name: ticket.customer_name || (ticket.customerId ? `Cư dân #${ticket.customerId}` : '–'),
+      phone: '',
+    },
+    attachments: attachments ?? ticket.attachments ?? [],
+    responses: Array.isArray(ticket.responses) ? ticket.responses : [],
+    assignments: Array.isArray(ticket.assignments) ? ticket.assignments : [],
+    suspectedDuplicateIds: Array.isArray(ticket.suspectedDuplicateIds) ? ticket.suspectedDuplicateIds : [],
+    history: Array.isArray(ticket.history)
+      ? ticket.history
+      : createdAt
+        ? [{ action: 'Tiếp nhận', to: status, at: createdAt, by: 'Hệ thống' }]
+        : [],
+  };
+}
+
+export const listTickets = async (params) => {
+  const response = await api('/api/feedbacks' + (params ? '?' + new URLSearchParams(params) : ''));
   const tickets = Array.isArray(response) ? response : response?.content;
   if (!Array.isArray(tickets)) {
     throw new Error('API danh sách phiếu trả về dữ liệu không hợp lệ.');
   }
-
-  const statuses = {
-    NEW: 'New',
-    ASSIGNED: 'Assigned',
-    IN_PROGRESS: 'InProgress',
-    PENDING_APPROVAL: 'PendingApproval',
-    RESOLVED: 'Resolved',
-    CLOSED: 'Closed',
-    REOPENED: 'Reopened',
-  };
-  const types = {
-    COMPLAINT: 'complaint',
-    SUGGESTION: 'suggestion',
-    PROPOSAL: 'suggestion',
-    PRAISE: 'praise',
-  };
-
-  return tickets.map((ticket) => ({
-    ...ticket,
-    tracking_code: ticket.tracking_code ?? ticket.code,
-    created_at: ticket.created_at ?? ticket.createdAt,
-    updated_at: ticket.updated_at ?? ticket.updatedAt,
-    type: types[ticket.type] || ticket.type,
-    status: statuses[ticket.status] || ticket.status,
-    priority: ticket.priority === 'NORMAL' ? 'Medium'
-      : ticket.priority ? ticket.priority[0] + ticket.priority.slice(1).toLowerCase() : ticket.priority,
-  }));
+  return tickets.map((t) => normalizeTicket(t));
 };
-export const getTicket = (idOrCode) => api('/api/feedbacks/' + encodeURIComponent(idOrCode));
+
+export const listMyTickets = async ({ page = 0, size = 10 } = {}) => {
+  const response = await api(`/api/feedbacks/mine?${new URLSearchParams({ page, size })}`);
+  const tickets = Array.isArray(response) ? response : response?.content;
+  if (!Array.isArray(tickets)) {
+    throw new Error('API danh sách phiếu trả về dữ liệu không hợp lệ.');
+  }
+  return {
+    items: tickets.map((t) => normalizeTicket(t)),
+    total: typeof response?.totalElements === 'number' ? response.totalElements : tickets.length,
+    page: typeof response?.number === 'number' ? response.number : page,
+    size: typeof response?.size === 'number' ? response.size : size,
+  };
+};
+
+export const uploadTicketAttachment = (feedbackId, file) => {
+  const fd = new FormData();
+  fd.append('file', file);
+  return api(`/api/feedbacks/${encodeURIComponent(feedbackId)}/attachments`, { method: 'POST', form: fd });
+};
+
+export const mergeTicket = (duplicateId, body) =>
+  api(`/api/feedbacks/${encodeURIComponent(duplicateId)}/merge`, { method: 'POST', body });
+
+export const getTicket = async (idOrCode) => {
+  const key = String(idOrCode ?? '').trim();
+  const path = /^\d+$/.test(key)
+    ? `/api/feedbacks/${encodeURIComponent(key)}`
+    : `/api/feedbacks/code/${encodeURIComponent(key)}`;
+  const ticket = await api(path);
+  let attachments = ticket.attachments;
+  if (!Array.isArray(attachments) && ticket?.id != null) {
+    attachments = await api(`/api/feedbacks/${ticket.id}/attachments`).catch(() => []);
+  }
+  return normalizeTicket(ticket, attachments);
+};
 export const getDashboard = () => api('/api/dashboard');
 
 /* ===================== 3. KHỐI HIỂN THỊ ===================== */
@@ -112,9 +184,18 @@ export const EscalatedTag = () => <Tag color="gold">Chuyển cấp</Tag>;
 
 export const AttachmentList = ({ items, showScan = false }) => items?.length ? (
   <div style={{ marginTop: 12, display: 'grid', gap: 6 }}>
-    {items.map((a, i) => (
-      <Text key={i} type="secondary"><PaperClipOutlined /> {a.original_name} ({sizeText(a.size_bytes)}){showScan ? ` · quét: ${a.scan_status}` : ''}</Text>
-    ))}
+    {items.map((a, i) => {
+      const name = a.original_name ?? a.fileName;
+      const bytes = a.size_bytes ?? a.sizeBytes;
+      const href = a.fileUrl ? `${API_BASE_URL}${a.fileUrl}` : null;
+      return (
+        <Text key={a.id ?? i} type="secondary">
+          <PaperClipOutlined /> {href ? <a href={href} target="_blank" rel="noreferrer">{name}</a> : name}
+          {bytes != null ? ` (${sizeText(bytes)})` : ''}
+          {showScan && a.scan_status ? ` · quét: ${a.scan_status}` : ''}
+        </Text>
+      );
+    })}
   </div>
 ) : null;
 

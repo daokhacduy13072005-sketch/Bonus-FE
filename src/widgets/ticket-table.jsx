@@ -14,7 +14,7 @@ const VARIANTS = {
   customer: {
     href: (c) => `/customer/complaints/${c.tracking_code}`,
     columns: (href) => [
-      { title: 'Mã', width: 110, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
+      { title: 'Mã', width: 175, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
       { title: 'Tiêu đề', render: (_, c) => titleCell(c) },
       { title: 'Loại', responsive: ['md'], render: (_, c) => TYPE_LABEL[c.type] },
       { title: 'Trạng thái', render: (_, c) => <StatusTag status={c.status} /> },
@@ -24,7 +24,7 @@ const VARIANTS = {
   staff: {
     href: (c) => `/staff/complaints/${c.id}`,
     columns: (href) => [
-      { title: 'Mã', width: 110, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
+      { title: 'Mã', width: 175, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
       { title: 'Tiêu đề', render: (_, c) => titleCell(c, c.service) },
       { title: 'Người gửi', responsive: ['md'], dataIndex: 'customer_name' },
       { title: 'Ưu tiên', render: (_, c) => <><PriorityTag priority={c.priority} />{c.escalated ? <> <EscalatedTag /></> : null}</> },
@@ -35,7 +35,7 @@ const VARIANTS = {
   manager: {
     href: (c) => `/manager/complaints/${c.id}`,
     columns: (href) => [
-      { title: 'Mã', width: 110, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
+      { title: 'Mã', width: 175, render: (_, c) => <CodeLink to={href(c)} code={c.tracking_code} /> },
       { title: 'Tiêu đề', render: (_, c) => titleCell(c, TYPE_LABEL[c.type]) },
       { title: 'Người gửi', responsive: ['md'], dataIndex: 'customer_name' },
       { title: 'Ưu tiên', render: (_, c) => <PriorityTag priority={c.priority} /> },
@@ -45,12 +45,15 @@ const VARIANTS = {
   },
 };
 
-export function TicketTable({ list, variant, loading, emptyText = 'Không có phiếu nào.' }) {
+export function TicketTable({ list, variant, loading, emptyText = 'Không có phiếu nào.', pagination }) {
   const navigate = useNavigate();
   const v = VARIANTS[variant];
+  const pager = pagination !== undefined
+    ? pagination
+    : list?.length > 8 ? { pageSize: 8, showSizeChanger: false } : false;
   return (
     <Table rowKey="id" size="middle" loading={loading} dataSource={list} columns={v.columns(v.href)}
-      pagination={list?.length > 8 ? { pageSize: 8, showSizeChanger: false } : false}
+      pagination={pager}
       locale={{ emptyText: <EmptyState text={emptyText} /> }}
       rowClassName="row-click" onRow={(c) => ({ onClick: () => navigate(v.href(c)) })} />
   );

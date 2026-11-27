@@ -12,12 +12,15 @@ export function EscalatedPage() {
   const [sp, setSp] = useSearchParams();
   const view = TABS.some(([v]) => v === sp.get('view')) ? sp.get('view') : 'escalated';
   const { data, loading, error, reload } = useRequest(() => listTickets(view === 'all' ? undefined : { view }), [view]);
+  const list = Array.isArray(data)
+    ? data.filter((t) => (view === 'escalated' ? t.escalated : view === 'pending' ? (t.status === 'PendingApproval' || t.requiresManagerApproval) : true))
+    : data;
   return (
     <Page>
       <PageBar title="Phiếu cần xử lý" subtitle="Các phiếu được chuyển cấp hoặc đang chờ Quản lý duyệt" />
       <Tabs activeKey={view} onChange={(v) => setSp({ view: v })} items={TABS.map(([key, label]) => ({ key, label }))} />
       <Card styles={{ body: { padding: 8 } }}>
-        {error ? <ErrorState error={error} onRetry={reload} /> : <TicketTable variant="manager" list={data} loading={loading} />}
+        {error ? <ErrorState error={error} onRetry={reload} /> : <TicketTable variant="manager" list={list} loading={loading} />}
       </Card>
     </Page>
   );

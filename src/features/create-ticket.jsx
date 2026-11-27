@@ -1,50 +1,122 @@
 // FEATURE: Cư dân gửi phản hồi / khiếu nại (SC-07).
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Card, Divider, Form, Input, Result, Select, Upload, App } from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, Result, Select, Upload, App } from 'antd';
 import { EnvironmentOutlined, InboxOutlined } from '@ant-design/icons';
-import { api } from '@shared/api.js';
+import { ApiError, api } from '@shared/api.js';
 import { sizeText } from '@shared/lib.js';
 import { useAction } from '@shared/ui.jsx';
-import { BUILDINGS, FLOOR_RE, ROOM_RE, SERVICES, TYPE_LABEL } from '@entities/ticket.jsx';
+import { BUILDINGS, FLOOR_RE, ROOM_RE, SERVICES, TYPE_LABEL, locationText, uploadTicketAttachment } from '@entities/ticket.jsx';
+import { useAuth } from '@entities/user.jsx';
+import { listCategories } from '@entities/category.js';
+import { listStaff } from '@entities/staff.js';
 import './features.css';
 
 /* ---------- Luật nghiệp vụ ---------- */
-// Quy tắc tệp đính kèm (SecRS IA-CF04). ⚠ Tài liệu CHƯA nêu số cụ thể — giá trị tạm, hỏi nhóm backend để chốt.
-export const FILE_RULES = { maxFiles: 5, maxBytes: 5 * 1024 * 1024, exts: ['jpg', 'jpeg', 'png', 'pdf'] };
+// Khớp cấu hình backend: tối đa 5 tệp, 10MB/tệp, định dạng JPG/PNG/WEBP/GIF/PDF.
+export const FILE_RULES = { maxFiles: 5, maxBytes: 10 * 1024 * 1024, exts: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf'] };
+
+const TYPE_TO_API = {
+  complaint: 'COMPLAINT',
+  suggestion: 'SUGGESTION',
+  proposal: 'PROPOSAL',
+  praise: 'PRAISE',
+  staff_feedback: 'COMPLAINT',
+};
 
 // Trả về chuỗi lỗi, hoặc null nếu hợp lệ
 export function checkFiles(files) {
   if (files.length > FILE_RULES.maxFiles) return `Tối đa ${FILE_RULES.maxFiles} tệp.`;
   for (const f of files) {
-    const ext = f.name.split('.').pop().toLowerCase();
+    const parts = f.name.split('.');
+    const ext = parts.length > 1 ? parts.pop().toLowerCase() : '';
     if (!FILE_RULES.exts.includes(ext)) return `“${f.name}”: loại tệp không được hỗ trợ (chỉ ${FILE_RULES.exts.join(', ')}).`;
     if (f.size > FILE_RULES.maxBytes) return `“${f.name}” (${sizeText(f.size)}) vượt giới hạn ${sizeText(FILE_RULES.maxBytes)}.`;
   }
   return null;
 }
 
-const createTicket = (formData) => api('/api/feedbacks', { method: 'POST', form: formData });   // multipart
+const createTicket = (body) => api('/api/feedbacks', { method: 'POST', body });
 const opt = (arr) => arr.map((v) => ({ value: v, label: v }));
 
 /* ---------- Form tạo phiếu ---------- */
 export function TicketForm({ onCreated }) {
   const [form] = Form.useForm();
+  const { message } = App.useApp();
+  const { user } = useAuth();
+  const typeValue = Form.useWatch('type', form);
+  const [categories, setCategories] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+
+  useEffect(() => {
+    listCategories().then((list) => setCategories(Array.isArray(list) ? list.filter((c) => c.active) : [])).catch(() => {});
+    listStaff().then((list) => setStaffList(Array.isArray(list) ? list.filter((s) => s.active) : [])).catch(() => {});
+  }, []);
+
   const [submit, loading] = useAction(async (v) => {
-    const fd = new FormData();
-    ['type', 'service', 'building', 'floor', 'room', 'location_note', 'title', 'description']
-      .forEach((k) => fd.append(k, String(v[k] ?? '').trim()));
-    (v.files || []).forEach((f) => fd.append('files', f.originFileObj));
-    const res = await createTicket(fd);
-    onCreated(res.tracking_code);
+    const customerId = user?.customer_id ?? user?.customerId;
+    if (!customerId) {
+      throw new ApiError(400, 'Không xác định được tài khoản cư dân. Vui lòng đăng nhập lại.');
+    }
+    const payload = {
+      customerId,
+      type: TYPE_TO_API[v.type] || 'COMPLAINT',
+      title: v.title.trim(),
+      content: v.description.trim(),
+      categoryId: v.categoryId || undefined,
+      serviceName: v.service,
+      location: locationText({
+        building: v.building,
+        floor: v.floor?.trim(),
+        room: v.room?.trim(),
+        note: v.location_note?.trim(),
+      }),
+      apartmentCode: v.room?.trim() || user?.apartment_code || user?.apartmentCode || undefined,
+      aboutStaffId: v.aboutStaffId || undefined,
+    };
+    const res = await createTicket(payload);
+    const files = (v.files || []).map((f) => f.originFileObj).filter(Boolean);
+    if (files.length && res?.id) {
+      let failed = 0;
+      for (const file of files) {
+        try { await uploadTicketAttachment(res.id, file); }
+        catch { failed++; }
+      }
+      if (failed) {
+        message.warning(`Đã gửi phiếu nhưng ${failed}/${files.length} tệp đính kèm tải lên thất bại.`);
+      }
+    }
+    onCreated(res.code || res.tracking_code);
   }, { form });
 
   return (
     <Form form={form} layout="vertical" size="large" requiredMark={false} onFinish={submit}
+      disabled={Boolean(user?.blocked)}
       initialValues={{ type: 'complaint', service: SERVICES[0], files: [] }}>
+      {user?.blocked && (
+        <Alert type="error" showIcon style={{ marginBottom: 16 }}
+          message="Tài khoản cư dân của bạn đang bị khóa quyền gửi phản hồi. Vui lòng liên hệ Ban quản lý." />
+      )}
       <div className="row2">
         <Form.Item name="type" label="Loại phản hồi"><Select options={Object.entries(TYPE_LABEL).map(([value, label]) => ({ value, label }))} /></Form.Item>
         <Form.Item name="service" label="Dịch vụ liên quan"><Select options={opt(SERVICES)} /></Form.Item>
       </div>
+      {(categories.length > 0 || staffList.length > 0) && (
+        <div className="row2">
+          {categories.length > 0 && (
+            <Form.Item name="categoryId" label="Danh mục sự cố (tùy chọn)">
+              <Select allowClear placeholder="Để hệ thống tự phân loại theo nội dung"
+                options={categories.map((c) => ({ value: c.id, label: `${c.name} (${c.code})` }))} />
+            </Form.Item>
+          )}
+          {staffList.length > 0 && (
+            <Form.Item name="aboutStaffId" label={typeValue === 'staff_feedback' ? 'Nhân viên được phản ánh' : 'Nhân viên liên quan (nếu có)'}>
+              <Select allowClear showSearch optionFilterProp="label" placeholder="— Chọn nhân viên (nếu có) —"
+                options={staffList.map((s) => ({ value: s.id, label: `${s.fullName} · ${s.department || s.role}` }))} />
+            </Form.Item>
+          )}
+        </div>
+      )}
 
       <Card size="small" className="loc-card" title={<><EnvironmentOutlined /> Vị trí xảy ra sự cố</>}>
         <div className="row2">

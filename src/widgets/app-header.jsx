@@ -8,10 +8,10 @@ import './widgets.css';
 
 // Menu theo vai trò: [đường dẫn, nhãn]
 const NAV = {
-  customer: [['/customer/new', 'Gửi phản hồi'], ['/customer/history', 'Phiếu của tôi'], ['/customer/track', 'Tra cứu mã']],
-  cs_staff: [['/staff/queue', 'Hàng đợi']],
+  customer: [['/customer/new', 'Gửi phản hồi'], ['/customer/history', 'Phiếu của tôi'], ['/customer/track', 'Tra cứu mã'], ['/customer/profile', 'Hồ sơ']],
+  cs_staff: [['/staff/queue', 'Hàng đợi'], ['/staff/customers', 'Cư dân'], ['/staff/directory', 'Nhân sự & Danh mục']],
   dept_staff: [['/dept/tasks', 'Việc được giao']],
-  manager: [['/manager/dashboard', 'Dashboard'], ['/manager/escalated', 'Chuyển cấp / Chờ duyệt']],
+  manager: [['/manager/dashboard', 'Dashboard'], ['/manager/escalated', 'Chuyển cấp / Chờ duyệt'], ['/staff/customers', 'Cư dân'], ['/staff/directory', 'Nhân sự & Danh mục']],
 };
 
 const GUIDE = (

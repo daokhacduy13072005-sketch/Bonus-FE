@@ -56,7 +56,10 @@ export function useAction(fn, { form, success, onDone } = {}) {
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const mounted = useRef(true);
-  useEffect(() => () => { mounted.current = false; }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
   const run = async (...args) => {
     setLoading(true);
     try {

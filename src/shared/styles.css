@@ -52,7 +52,7 @@ h2 { font-size: 22px; font-weight: 700; margin: 0; }
 .btn-accent.ant-btn:hover::after { animation: shine .8s ease; }
 @keyframes shine { to { left: 130%; } }
 
-.code-link { font: 700 13.5px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .5px; padding: 3px 9px; border-radius: 7px; background: var(--pr-soft); color: var(--pr); transition: all .2s; }
+.code-link { display: inline-block; white-space: nowrap; font: 700 13.5px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .5px; padding: 3px 9px; border-radius: 7px; background: var(--pr-soft); color: var(--pr); transition: all .2s; }
 .code-link:hover { background: var(--pr); color: #fff; }
 
 @media (prefers-reduced-motion: reduce) {
