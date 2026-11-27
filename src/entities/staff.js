@@ -1,4 +1,4 @@
-// Thực thể NHÂN VIÊN: danh sách nhân viên, vai trò, bộ phận và trạng thái trực.
+// danh sách nhân viên, vai trò, bộ phận và trạng thái trực.
 import { api } from '@shared/api.js';
 
 export const STAFF_ROLE_LABEL = {

@@ -54,12 +54,7 @@ export function TicketForm({ onCreated }) {
   }, []);
 
   const [submit, loading] = useAction(async (v) => {
-    const customerId = user?.customer_id ?? user?.customerId;
-    if (!customerId) {
-      throw new ApiError(400, 'Không xác định được tài khoản cư dân. Vui lòng đăng nhập lại.');
-    }
     const payload = {
-      customerId,
       type: TYPE_TO_API[v.type] || 'COMPLAINT',
       title: v.title.trim(),
       content: v.description.trim(),

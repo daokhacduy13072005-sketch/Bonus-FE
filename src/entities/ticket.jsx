@@ -1,4 +1,4 @@
-// Thực thể PHIẾU PHẢN HỒI / KHIẾU NẠI: từ điển nghiệp vụ, gọi API, và các khối hiển thị dùng lại nhiều nơi.
+//  PHIẾU PHẢN HỒI / KHIẾU NẠI: từ điển nghiệp vụ, gọi API, và các khối hiển thị dùng lại nhiều nơi.
 import { Link } from 'react-router-dom';
 import { Alert, Steps, Tag, Timeline, Typography } from 'antd';
 import { CheckCircleFilled, ClockCircleOutlined, PaperClipOutlined } from '@ant-design/icons';
@@ -24,7 +24,7 @@ export const SIMPLE_TYPES = ['suggestion', 'praise', 'staff_feedback'];
 // Dịch vụ liên quan (bối cảnh chung cư)
 export const SERVICES = ['Vệ sinh', 'Điện nước', 'Thang máy', 'Gửi xe', 'Tiếng ồn', 'An ninh', 'Phí dịch vụ', 'Khác'];
 
-// ⚠ Danh sách tòa là ví dụ — sửa theo chung cư thật (hoặc lấy từ backend qua /api/meta).
+// Danh sách tòa là ví dụ — sửa theo chung cư thật ( /api/meta).
 export const BUILDINGS = ['Tòa 1', 'Tòa 2', 'Tòa 3', 'Khu vực chung (sân, hầm xe, tiện ích)'];
 // Tầng: số 1–99 hoặc hầm B1–B3. Phòng: chữ/số/dấu gạch, tối đa 10 ký tự (không bắt buộc).
 export const FLOOR_RE = /^(B[1-3]|[1-9]\d?)$/i;
@@ -160,11 +160,13 @@ export const uploadTicketAttachment = (feedbackId, file) => {
 export const mergeTicket = (duplicateId, body) =>
   api(`/api/feedbacks/${encodeURIComponent(duplicateId)}/merge`, { method: 'POST', body });
 
-export const getTicket = async (idOrCode) => {
+export const getTicket = async (idOrCode, isCustomer = false) => {
   const key = String(idOrCode ?? '').trim();
-  const path = /^\d+$/.test(key)
-    ? `/api/feedbacks/${encodeURIComponent(key)}`
-    : `/api/feedbacks/code/${encodeURIComponent(key)}`;
+  const path = isCustomer && /^\d+$/.test(key)
+    ? `/api/feedbacks/mine/${encodeURIComponent(key)}`
+    : (/^\d+$/.test(key)
+      ? `/api/feedbacks/${encodeURIComponent(key)}`
+      : `/api/feedbacks/code/${encodeURIComponent(key)}`);
   const ticket = await api(path);
   let attachments = ticket.attachments;
   if (!Array.isArray(attachments) && ticket?.id != null) {
@@ -174,7 +176,7 @@ export const getTicket = async (idOrCode) => {
 };
 export const getDashboard = () => api('/api/dashboard');
 
-/* ===================== 3. KHỐI HIỂN THỊ ===================== */
+/* ===================== 3.  HIỂN THỊ ===================== */
 
 export const StatusTag = ({ status }) => <Tag color={STATUS_COLOR[status]} style={{ marginInlineEnd: 0 }}>{STATUS_LABEL[status] || status}</Tag>;
 export const PriorityTag = ({ priority }) => priority

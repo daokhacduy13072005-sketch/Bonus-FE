@@ -1,4 +1,4 @@
-// Thực thể CƯ DÂN: hồ sơ cá nhân, hợp đồng thuê, trạng thái xác minh/khóa.
+// hồ sơ cá nhân, hợp đồng thuê, trạng thái xác minh/khóa.
 import { api } from '@shared/api.js';
 
 export const RESIDENT_TYPE_LABEL = {

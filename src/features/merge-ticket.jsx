@@ -13,7 +13,6 @@ export function MergeCard({ ticket: c, user, onDone }) {
   const [submit, loading] = useAction(
     (v) => mergeTicket(c.id, {
       originalFeedbackId: Number(v.originalFeedbackId),
-      staffId: user?.staff_id ?? user?.staffId ?? user?.id,
       note: (v.note || '').trim() || undefined,
     }),
     { form, success: 'Đã gộp phiếu trùng vào phiếu gốc.', onDone },

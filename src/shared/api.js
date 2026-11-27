@@ -37,11 +37,11 @@ export const configureApi = (h) => { hooks = { ...hooks, ...h }; };
  */
 export async function api(path, { method = 'GET', body, form, auth = true } = {}) {
   const token = hooks.getToken();
-  const customerId = hooks.getCustomerId?.();
+  // Xóa biến customerId vì backend không còn sử dụng header X-Customer-Id
+// const customerId = hooks.getCustomerId?.();
   try {
     const headers = {};
     if (token) headers.Authorization = `Bearer ${token}`;
-    if (customerId) headers['X-Customer-Id'] = String(customerId);
     if (body) headers['Content-Type'] = 'application/json';
 
     let res;

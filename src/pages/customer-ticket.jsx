@@ -14,7 +14,7 @@ import './pages.css';
 export function CustomerTicketPage() {
   const { code } = useParams();
   const { data, loading, error, reload } = useRequest(async () => {
-    const [ticket, categories] = await Promise.all([getTicket(code), listCategories().catch(() => [])]);
+    const [ticket, categories] = await Promise.all([getTicket(code, true), listCategories().catch(() => [])]);
     return { ticket, categories };
   }, [code]);
 
@@ -59,7 +59,7 @@ export function CustomerTicketPage() {
               label: 'Hạn SLA',
               children: `Phản hồi: ${fmt(c.responseDueAt)} · Xử lý: ${fmt(c.resolveDueAt)}`,
             }] : []),
-            { key: 'l', label: '📍 Vị trí', span: 2, children: locationText(c.location) },
+            { key: 'l', label: ' Vị trí', span: 2, children: locationText(c.location) },
           ]} />
           <h3 className="sec-title">Nội dung bạn đã gửi</h3>
           <p className="pre">{c.description}</p>

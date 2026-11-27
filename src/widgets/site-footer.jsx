@@ -8,7 +8,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
-          <div className="footer-brand">🏢 {BRAND}</div>
+          <div className="footer-brand"> {BRAND}</div>
           <p>Cổng thông tin giúp cư dân gửi khiếu nại, góp ý và theo dõi tiến độ xử lý minh bạch cùng Ban quản lý.</p>
         </div>
         <div><h4>Dành cho cư dân</h4><Link to="/register">Đăng ký tài khoản</Link><Link to="/login">Đăng nhập</Link><Link to="/customer/track">Tra cứu theo mã</Link></div>

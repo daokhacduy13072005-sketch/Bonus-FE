@@ -73,8 +73,8 @@ export function AppHeader() {
   return (
     <>
       <div className="topstrip"><div className="container">
-        <span>🏢 Cổng phản hồi &amp; khiếu nại cư dân</span>
-        <span className="hide-sm">Tiếp nhận 24/7 · Theo dõi tiến độ theo thời gian thực</span>
+        <span> Cổng phản hồi &amp; khiếu nại cư dân</span>
+        <span className="hide-sm">Tiếp nhận 24/7 - Theo dõi tiến độ theo thời gian thực</span>
       </div></div>
       <header className="top"><div className="container top-inner">
         <Link className="brand" to="/">

@@ -1,4 +1,17 @@
-// Thực thể BỘ PHẬN xử lý
+// bộ phận xử lý
 import { api } from '@shared/api.js';
 
-export const getDepartments = async () => (await api('/api/meta')).departments;
+/**
+ * Fetch department list.
+ * Tries the real `/api/meta` endpoint; if it fails (e.g., 404),
+ * gracefully falls back to an empty array.
+ */
+export const getDepartments = async () => {
+  try {
+    const meta = await api('/api/meta');
+    return meta?.departments ?? [];
+  } catch (e) {
+    console.warn('Endpoint /api/meta not available – returning empty list.', e);
+    return [];
+  }
+};

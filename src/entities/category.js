@@ -1,4 +1,4 @@
-// Thực thể DANH MỤC PHẢN HỒI: lấy từ backend (/api/categories) phục vụ phân loại tự động & tạo phiếu.
+//  DANH MỤC PHẢN HỒI:(/api/categories) phục vụ phân loại tự động & tạo phiếu.
 import { api } from '@shared/api.js';
 
 export const CATEGORY_GROUP_LABEL = {

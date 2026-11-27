@@ -24,7 +24,7 @@ export function TicketDetailPage() {
   const { user } = useAuth();
   const { data, loading, error, reload } = useRequest(async () => {
     const [ticket, departments, categories, staffList] = await Promise.all([
-      getTicket(id),
+      getTicket(id, user.role === 'customer'),
       getDepartments().catch(() => []),
       listCategories().catch(() => []),
       listStaff().catch(() => []),
@@ -67,16 +67,16 @@ export function TicketDetailPage() {
                 </Space>
               ),
             },
-            { key: 'p', label: 'Ưu tiên', children: <PriorityTag priority={c.priority} /> },
+            { key: 'p', label: 'Mức độ ưu tiên', children: <PriorityTag priority={c.priority} /> },
             { key: 'u', label: 'Người gửi', children: `${c.customer.name}${c.customer.phone ? ` · ${c.customer.phone}` : ''}` },
             { key: 'as', label: 'Nhân sự phụ trách', children: assignedStaff ? `${assignedStaff.fullName} (${assignedStaff.department})` : (c.assignedStaffId ? `NV #${c.assignedStaffId}` : 'Chưa gán') },
-            { key: 'd', label: 'Gửi lúc', children: fmt(c.created_at) },
+            { key: 'd', label: 'Thời gian', children: fmt(c.created_at) },
             ...(c.responseDueAt || c.resolveDueAt ? [{
               key: 'sla',
               label: 'Hạn SLA',
               children: `Phản hồi: ${fmt(c.responseDueAt)} · Xử lý: ${fmt(c.resolveDueAt)}`,
             }] : []),
-            { key: 'l', label: '📍 Vị trí sự cố', span: 2, children: locationText(c.location) },
+            { key: 'l', label: ' Vị trí sự cố', span: 2, children: locationText(c.location) },
           ]} />
           <h3 className="sec-title">Nội dung</h3>
           <p className="pre">{c.description}</p>
